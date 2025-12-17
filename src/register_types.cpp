@@ -7,6 +7,10 @@
 
 #include "example_class.h"
 #include "test_nested_imports/example_class copy.h"
+#include "label_maker.h"
+
+#include "collections/levents.h"
+#include "collections/llabeling.h"
 
 #include "collections_test/levents_test.h"
 
@@ -16,7 +20,6 @@ using namespace godot;
 
 void initialize_gdextension_types(ModuleInitializationLevel p_level)
 {
-
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
@@ -25,6 +28,9 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 
 	GDREGISTER_CLASS(ExampleClass);
 	GDREGISTER_CLASS(ExampleClass2);
+
+	//GDREGISTER_CLASS(Labeling); Can't register template class directly :(
+	GDREGISTER_CLASS(LabelMaker);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
