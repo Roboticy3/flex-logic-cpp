@@ -8,13 +8,21 @@
 #include "example_class.h"
 #include "test_nested_imports/example_class copy.h"
 
+#include "collections_test/levents_test.h"
+
+#include "test_definitions.h"
+
 using namespace godot;
 
 void initialize_gdextension_types(ModuleInitializationLevel p_level)
 {
+
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+
+	test_gdextension();
+
 	GDREGISTER_CLASS(ExampleClass);
 	GDREGISTER_CLASS(ExampleClass2);
 }
@@ -23,6 +31,11 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+}
+
+void test_gdextension() {
+	TestSingleton::start("test gdextension");
+	levents_test();
 }
 
 extern "C"

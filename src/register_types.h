@@ -4,4 +4,6 @@
 void initialize_gdextension_types();
 void uninitialize_gdextension_types();
 
+void test_gdextension();
+
 #endif // EXAMPLE_REGISTER_TYPES_H
