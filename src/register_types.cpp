@@ -13,6 +13,7 @@
 #include "collections/llabeling.h"
 
 #include "collections_test/levents_test.h"
+#include "collections_test/llabeling_test.h"
 
 #include "test_definitions.h"
 
@@ -42,6 +43,8 @@ void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
 void test_gdextension() {
 	TestSingleton::start("test gdextension");
 	levents_test();
+	llabeling_test();
+	TestSingleton::status("all tests");
 }
 
 extern "C"

@@ -20,7 +20,15 @@ Use Godot Vector type since this structure will have to interact a lot with the 
 template<typename T, typename L>
 class LLabeling {
   public:
+    /*
+    Number of accessible labels, including those mapped to empty entries
+    */
     size_t size();
+
+    /*
+    Number of labeled elements
+    */
+    size_t count();
 
     /*
     Add `element` to the labeling at lowest possible label
@@ -45,7 +53,7 @@ class LLabeling {
     /*
     Copy the elements onto the end of `out`. Used for printing contents.
     */
-    void compress(std::vector<T> out);
+    void compress(std::vector<T> &out);
 };
 
 //forward declare with the default labeling type `ll`
@@ -53,4 +61,12 @@ template<typename T>
 class Labeling : public LLabeling<T, ll> {
   private:
     std::vector<T> block;
+  public:
+    size_t size();
+    size_t count();
+    ll add(T element);
+    ll set(T element, ll at);
+    T *get(ll at);
+    bool remove(ll at);
+    void compress(std::vector<T> &out);
 };
