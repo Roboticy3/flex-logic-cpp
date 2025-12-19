@@ -88,3 +88,4 @@ void Labeling<T>::compress(std::vector<T> &out) {
 template class Labeling<std::string>;
 template class Labeling<int>;
 template class Labeling<double>;
+
