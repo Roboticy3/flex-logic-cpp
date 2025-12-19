@@ -5,13 +5,6 @@
 typedef long long ll;
 
 /*
-IsEmpty from the Go library will be replaced here with simply { 0 } in general.
-
-Any emptyable type should be a struct that can be initialize using this macro.
-*/
-#define EMPTY = { 0 }
-
-/*
 Mapping between indices and elements where an element is assigned the lowest
 empty index.
 
@@ -56,7 +49,11 @@ class LLabeling {
     void compress(std::vector<T> &out);
 };
 
-//forward declare with the default labeling type `ll`
+/*
+Specialized labeling for numeric labels ll
+
+Empty values correspond to { 0 } or T{}, and T must be a literal.
+*/
 template<typename T>
 class Labeling : public LLabeling<T, ll> {
   private:
@@ -69,4 +66,23 @@ class Labeling : public LLabeling<T, ll> {
     T *get(ll at);
     bool remove(ll at);
     void compress(std::vector<T> &out);
+};
+
+/*
+Specialized labeling on labels
+
+Empty labels are -1
+*/
+class LabelLabeling : public LLabeling<ll, ll> {
+  private:
+    std::vector<ll> block;
+    static constexpr ll EMPTY_VALUE = -1;
+  public:
+    size_t size();
+    size_t count();
+    ll add(ll element);
+    ll set(ll element, ll at);
+    ll *get(ll at);
+    bool remove(ll at);
+    void compress(std::vector<ll> &out);
 };

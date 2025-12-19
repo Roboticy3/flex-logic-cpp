@@ -89,3 +89,77 @@ template class Labeling<std::string>;
 template class Labeling<int>;
 template class Labeling<double>;
 
+// Template specialization implementation for LabelLabeling
+size_t LabelLabeling::size() {
+  return this->block.size();
+}
+
+size_t LabelLabeling::count() {
+    // Count non-empty elements in the block
+    size_t count = 0;
+    for (const auto& elem : this->block) {
+        if (elem != EMPTY_VALUE) {  // Check if element is not empty (-1)
+            count++;
+        }
+    }
+    return count;
+}
+
+ll LabelLabeling::add(ll element) {
+    // Find the lowest available empty index
+    for (ll i = 0; i < this->block.size(); i++) {
+        if (this->block[i] == EMPTY_VALUE) {  // Empty slot found (-1)
+            this->block[i] = element;
+            return i;
+        }
+    }
+    
+    // No empty slots found, add to end
+    this->block.push_back(element);
+    return this->block.size() - 1;
+}
+
+ll LabelLabeling::set(ll element, ll at) {
+    // Ensure block is large enough
+    if (at >= this->block.size()) {
+        this->block.resize(at + 1, EMPTY_VALUE);
+    }
+    
+    this->block[at] = element;
+    return at;
+}
+
+ll *LabelLabeling::get(ll at) {
+    if (at >= this->block.size()) {
+        return nullptr;
+    }
+    
+    // Return nullptr if slot is empty, otherwise return pointer to element
+    if (this->block[at] == EMPTY_VALUE) {
+        return nullptr;
+    }
+    
+    return &this->block[at];
+}
+
+bool LabelLabeling::remove(ll at) {
+    if (at >= this->block.size()) {
+        return false;
+    }
+    
+    if (this->block[at] == EMPTY_VALUE) {
+        return false;  // Already empty
+    }
+    
+    this->block[at] = EMPTY_VALUE;  // Set to empty value (-1)
+    return true;
+}
+
+void LabelLabeling::compress(std::vector<ll> &out) {
+    for (const auto& elem : this->block) {
+        if (elem != EMPTY_VALUE) {  // Only add non-empty elements
+            out.push_back(elem);
+        }
+    }
+}
+
