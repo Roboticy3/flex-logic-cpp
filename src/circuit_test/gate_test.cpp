@@ -13,11 +13,11 @@ std::vector<pin<int>> make_test_pins(std::vector<int> states) {
 
   for (int s : states) {
     result.push_back(pin<int>{
+      true,
       {
         { 0 },
         1
       },
-      true,
       s,
     });
   }
