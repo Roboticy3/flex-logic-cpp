@@ -21,10 +21,15 @@ class TestSingleton {
     template<typename T>
     inline static void assert(T value, T compare, std::string label) {
       if ((value != compare)) {
-        TestSingleton::t_state |= (value != compare);
+        TestSingleton::t_state |= (long long)(value != compare);
         print_line(vformat("\tASSERTION %s FAILED! (expected %s, found %s)", label.c_str(), compare, value)); 
       }
     } 
+
+    inline static void fail(std::string msg) {
+      TestSingleton::t_state |= 1;
+      print_line(vformat("%s", msg.c_str()));
+    }
 
     inline static long long status(std::string name) { 
       print_line(vformat("Test status for %s... %s", name.c_str(), TestSingleton::t_state ? "NOT OK":"OK"));

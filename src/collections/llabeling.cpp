@@ -1,20 +1,21 @@
-#include "llabeling.h"
-
 #include <string>
+
+#include "collections/llabeling.h"
+#include "collections/span.h"
 
 // Implementation for Labeling class (inherits from LLabeling<T, ll>)
 
 template<typename T>
 size_t Labeling<T>::size() {
-  return this->block.size();
+  return this->buffer.size();
 }
 
 template<typename T>
 size_t Labeling<T>::count() {
-    // Count non-empty elements in the block
+    // Count non-empty elements in the buffer
     size_t count = 0;
-    for (const auto& elem : this->block) {
-        if (elem != T{}) {  // Check if element is not empty/default constructed
+    for (const auto& elem : this->buffer) {
+        if (!this->is_empty(elem)) {  // Check if element is not empty/default constructed
             count++;
         }
     }
@@ -24,61 +25,61 @@ size_t Labeling<T>::count() {
 template<typename T>
 ll Labeling<T>::add(T element) {
     // Find the lowest available empty index
-    for (ll i = 0; i < this->block.size(); i++) {
-        if (this->block[i] == T{}) {  // Empty slot found
-            this->block[i] = element;
+    for (ll i = 0; i < this->buffer.size(); i++) {
+        if (this->is_empty(this->buffer[i])) {  // Empty slot found
+            this->buffer[i] = element;
             return i;
         }
     }
     
     // No empty slots found, add to end
-    this->block.push_back(element);
-    return this->block.size() - 1;
+    this->buffer.push_back(element);
+    return this->buffer.size() - 1;
 }
 
 template<typename T>
 ll Labeling<T>::set(T element, ll at) {
-    // Ensure block is large enough
-    if (at >= this->block.size()) {
-        this->block.resize(at + 1, T{});
+    // Ensure buffer is large enough
+    if (at >= this->buffer.size()) {
+        this->buffer.resize(at + 1, T{});
     }
     
-    this->block[at] = element;
+    this->buffer[at] = element;
     return at;
 }
 
 template<typename T>
 T *Labeling<T>::get(ll at) {
-    if (at >= this->block.size()) {
+    if (at >= this->buffer.size()) {
         return nullptr;
     }
     
     // Return nullptr if slot is empty, otherwise return pointer to element
-    if (this->block[at] == T{}) {
+    if (this->is_empty(this->buffer[at])) {
         return nullptr;
     }
     
-    return &this->block[at];
+    return &this->buffer[at];
 }
 
 template<typename T>
 bool Labeling<T>::remove(ll at) {
-    if (at >= this->block.size()) {
+    if (at >= this->buffer.size()) {
         return false;
     }
     
-    if (this->block[at] == T{}) {
+    if (this->is_empty(this->buffer[at])) {
         return false;  // Already empty
     }
     
-    this->block[at] = T{};  // Set to empty/default value
+    this->buffer[at] = T{};  // Set to empty/default value
     return true;
 }
 
 template<typename T>
 void Labeling<T>::compress(std::vector<T> &out) {
-    for (const auto& elem : this->block) {
-        if (elem != T{}) {  // Only add non-empty elements
+    for (const auto& elem : this->buffer) {
+        if (!this->is_empty(elem)) {  // Only add non-empty elements
             out.push_back(elem);
         }
     }
@@ -89,77 +90,154 @@ template class Labeling<std::string>;
 template class Labeling<int>;
 template class Labeling<double>;
 
-// Template specialization implementation for LabelLabeling
-size_t LabelLabeling::size() {
-  return this->block.size();
-}
+template<typename T>
+span<T> BlockLabeling<T>::add_block(size_t size, ll start) {
+    span<T> new_block = { 0 };
 
-size_t LabelLabeling::count() {
-    // Count non-empty elements in the block
-    size_t count = 0;
-    for (const auto& elem : this->block) {
-        if (elem != EMPTY_VALUE) {  // Check if element is not empty (-1)
-            count++;
+    if (start < 0) {
+        return new_block;
+    }
+
+    new_block.base = &this->buffer;
+    new_block.size = size;
+
+    for (ll i = start; i < this->buffer.size(); i++) {
+        ll j = i;
+        ll end = j + size;
+        for (; i < end && i < this->buffer.size(); i++) {
+            if (this->blocks[i] != LABEL_EMPTY) {
+                break;
+            }
+        }
+        if (i == end) {
+            new_block.index = j;
+            for (size_t k = 0; k < size; k++) {
+                this->blocks[j + k] = j;
+            }
+            return new_block;
         }
     }
-    return count;
+
+    new_block.index = this->buffer.size();
+
+    for (size_t i = 0; i < size; i++) {
+        this->buffer.push_back(T{});
+        this->blocks.push_back(new_block.index);
+    }
+
+    return new_block;
 }
 
-ll LabelLabeling::add(ll element) {
-    // Find the lowest available empty index
-    for (ll i = 0; i < this->block.size(); i++) {
-        if (this->block[i] == EMPTY_VALUE) {  // Empty slot found (-1)
-            this->block[i] = element;
-            return i;
-        }
-    }
-    
-    // No empty slots found, add to end
-    this->block.push_back(element);
-    return this->block.size() - 1;
-}
-
-ll LabelLabeling::set(ll element, ll at) {
-    // Ensure block is large enough
-    if (at >= this->block.size()) {
-        this->block.resize(at + 1, EMPTY_VALUE);
-    }
-    
-    this->block[at] = element;
-    return at;
-}
-
-ll *LabelLabeling::get(ll at) {
-    if (at >= this->block.size()) {
-        return nullptr;
-    }
-    
-    // Return nullptr if slot is empty, otherwise return pointer to element
-    if (this->block[at] == EMPTY_VALUE) {
-        return nullptr;
-    }
-    
-    return &this->block[at];
-}
-
-bool LabelLabeling::remove(ll at) {
-    if (at >= this->block.size()) {
+template<typename T>
+bool BlockLabeling<T>::remove_block(ll from) {
+    if (from < 0 || from >= this->blocks.size()) {
         return false;
     }
-    
-    if (this->block[at] == EMPTY_VALUE) {
-        return false;  // Already empty
+
+    ll start = this->blocks[from];
+    if (start == LABEL_EMPTY) {
+        return false;
     }
-    
-    this->block[at] = EMPTY_VALUE;  // Set to empty value (-1)
+
+    for (ll i = start; i < this->blocks.size(); i++) {
+        if (this->blocks[i] != from) {
+            break;
+        }
+
+        this->blocks[i] = LABEL_EMPTY;
+    }
+
     return true;
 }
 
-void LabelLabeling::compress(std::vector<ll> &out) {
-    for (const auto& elem : this->block) {
-        if (elem != EMPTY_VALUE) {  // Only add non-empty elements
-            out.push_back(elem);
-        }
+template<typename T>
+span<T> BlockLabeling<T>::get_block(ll from) {
+    span<T> result = { 0 };
+
+    if (from < 0 || from >= this->blocks.size()) {
+        return result;
     }
+
+    ll start = this->blocks[from];
+    if (start == LABEL_EMPTY) {
+        return result;
+    }
+
+    result.base = &this->buffer;
+    result.index = this->blocks[from];
+
+    for (ll i = start; i < this->blocks.size(); i++) {
+        if (this->blocks[i] != from) {
+            break;
+        }
+
+        result.size++;
+    }
+
+    return result;
 }
 
+template<typename T>
+span<T> BlockLabeling<T>::set_block(ll start, span<T> source) {
+
+    if (start < 0 || start >= this->blocks.size()) {
+        return { 0 };
+    }
+
+    size_t size = start + source.size < this->buffer.size() ? source.size : this->buffer.size() - start;
+    
+    for (int i = 0; i < size; i++) {
+        this->buffer[start + i] = source[i];
+        this->blocks[start + i] = start;
+    }
+
+    return span<T>{&this->buffer, size_t(start), size};
+}
+
+template<typename T>
+std::vector<std::vector<T>> BlockLabeling<T>::compress_blocks() {
+    std::vector<std::vector<T>> result;
+    
+    if (this->blocks.empty()) {
+        return result;
+    }
+
+    ll current_block_start = LABEL_EMPTY;
+    std::vector<T> current_block_data;
+
+    for (ll i = 0; i < this->blocks.size(); i++) {
+        ll block_start = this->blocks[i];
+        
+        // Skip empty slots
+        if (block_start == LABEL_EMPTY) {
+            continue;
+        }
+
+        // If we found a new block start
+        if (block_start == i) {
+            // If we were building a block, add it to results
+            if (!current_block_data.empty()) {
+                result.push_back(std::move(current_block_data));
+                current_block_data.clear();
+            }
+            current_block_start = block_start;
+        }
+
+        // Add the element to the current block
+        if (i < this->buffer.size()) {
+            current_block_data.push_back(this->buffer[i]);
+        }
+    }
+
+    // Add the last block if there is one
+    if (!current_block_data.empty()) {
+        result.push_back(std::move(current_block_data));
+    }
+
+    return result;
+}
+
+template class BlockLabeling<std::string>;
+template class BlockLabeling<int>;
+template class BlockLabeling<double>;
+template class BlockLabeling<char>;

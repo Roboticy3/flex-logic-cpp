@@ -8,8 +8,8 @@
 #include "circuit/circuit.h"
 #include "circuit/gate_types_example.h"
 
-std::vector<pin<int>> make_test_pins(std::vector<int> states) {
-  std::vector<pin<int>> result;
+Buffer<pin<int>> make_test_pins(std::vector<int> states) {
+  Buffer<pin<int>> result;
 
   for (int s : states) {
     result.push_back(pin<int>{
@@ -26,10 +26,11 @@ std::vector<pin<int>> make_test_pins(std::vector<int> states) {
 }
 
 void test_and() {
+  TestSingleton::start("and");
   auto pins = make_test_pins({1, 1, 0}); // Inputs: A=1, B=1, Output=0
   levents<int, int> events;
   
-  EXAMPLE_GATES[0].solver(span<pin<int>>{pins.data(), 3}, events, 0); // AND gate
+  EXAMPLE_GATES[0].solver(span<pin<int>>{&pins, 0, 3}, events, 0); // AND gate
   
   TestSingleton::assert<int>(pins[2].state, 1, "AND gate output state");
   TestSingleton::assert<size_t>(events.size(), 1, "AND gate event count");
@@ -41,10 +42,11 @@ void test_and() {
 }
 
 void test_or() {
+  TestSingleton::start("or");
   auto pins = make_test_pins({1, 1, 0}); // Inputs: A=1, Output=0
   levents<int, int> events;
   
-  EXAMPLE_GATES[1].solver(span<pin<int>>{pins.data(), 2}, events, 0); // NOT gate
+  EXAMPLE_GATES[1].solver(span<pin<int>>{&pins, 0, 2}, events, 0); // NOT gate
   
   TestSingleton::assert<int>(pins[1].state, ~1, "NOT gate output state");
   TestSingleton::assert<int>(events.size(), 1, "NOT gate event count");
@@ -56,10 +58,11 @@ void test_or() {
 }
 
 void test_latch() {
+  TestSingleton::start("latch");
   auto pins = make_test_pins({1, 0, 0, 0}); // Inputs: SET=1, RESET=0, INNER=0, OUT=0
   levents<int, int> events;
   
-  EXAMPLE_GATES[2].solver(span<pin<int>>{pins.data(), 4}, events, 0); // LATCH gate
+  EXAMPLE_GATES[2].solver(span<pin<int>>{&pins, 0, 4}, events, 0); // LATCH gate
   
   TestSingleton::assert<int>(pins[2].state, 1, "LATCH gate inner state");
   TestSingleton::assert<int>(pins[3].state, 1, "LATCH gate output state");
