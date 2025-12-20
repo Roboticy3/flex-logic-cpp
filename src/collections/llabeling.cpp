@@ -84,6 +84,11 @@ void Labeling<T>::compress(std::vector<T> &out) {
     }
 }
 
+template<typename T>
+std::vector<T> Labeling<T>::copy_buffer() {
+    return std::vector(this->buffer.begin(), this->buffer.end());
+}
+
 // Explicit instantiations for common types
 template class Labeling<std::string>;
 template class Labeling<int>;
@@ -100,28 +105,35 @@ span<T> BlockLabeling<T>::add_block(size_t size, ll start) {
     new_block.base = this;
     new_block.size = size;
 
+    int insertion_point = LABEL_EMPTY;
     for (ll i = start; i < this->buffer.size(); i++) {
         ll j = i;
         ll end = j + size;
-        for (; i < end && i < this->buffer.size(); i++) {
+        for (; i < this->buffer.size() && i < end; i++) {
             if (this->blocks[i] != LABEL_EMPTY) {
                 break;
             }
         }
+
         if (i == end) {
-            new_block.index = j;
-            for (size_t k = 0; k < size; k++) {
-                this->blocks[j + k] = j;
-            }
-            return new_block;
+            insertion_point = j;
+            break;
         }
     }
 
-    new_block.index = this->buffer.size();
-
-    for (size_t i = 0; i < size; i++) {
-        this->buffer.push_back(T{});
-        this->blocks.push_back(new_block.index);
+    if (insertion_point != LABEL_EMPTY) {
+        new_block.index = insertion_point;
+        for (size_t k = 0; k < size; k++) {
+            this->blocks[insertion_point + k] = insertion_point;
+        }
+        return new_block;
+    }
+    else {
+        new_block.index = this->buffer.size();
+        for (size_t i = 0; i < size; i++) {
+            this->buffer.push_back(T{});
+            this->blocks.push_back(new_block.index);
+        }
     }
 
     return new_block;
@@ -166,7 +178,7 @@ span<T> BlockLabeling<T>::get_block(ll from) {
     result.index = this->blocks[from];
 
     for (ll i = start; i < this->blocks.size(); i++) {
-        if (this->blocks[i] != from) {
+        if (this->blocks[i] != start) {
             break;
         }
 
@@ -234,6 +246,11 @@ std::vector<std::vector<T>> BlockLabeling<T>::compress_blocks() {
     }
 
     return result;
+}
+
+template<typename T>
+std::vector<ll> BlockLabeling<T>::copy_blocks() {
+    return std::vector<ll>(this->blocks.begin(), this->blocks.end());
 }
 
 template class BlockLabeling<std::string>;

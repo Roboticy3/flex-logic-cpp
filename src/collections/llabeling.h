@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-
+#include <string>
 #include <functional>
 #include <vector>
 
@@ -89,6 +89,8 @@ class Labeling : public LLabeling<T, ll> {
     bool remove(ll at);
     void compress(std::vector<T> &out);
 
+    std::vector<T> copy_buffer();
+
     T &operator[](size_t idx) { return buffer[idx]; }
 };
 
@@ -101,7 +103,7 @@ struct span {
   size_t index;
   size_t size;
   
-  T& operator[](size_t idx) { return (*base)[idx]; }
+  T& operator[](size_t idx) { return (*base)[index + idx]; }
 };
 
 template<typename T>
@@ -166,5 +168,8 @@ class BlockLabeling : private Labeling<T> {
     O(n)
     */
     std::vector<std::vector<T>> compress_blocks();
+
+    using Labeling<T>::copy_buffer;
+    std::vector<ll> copy_blocks();
 };
 

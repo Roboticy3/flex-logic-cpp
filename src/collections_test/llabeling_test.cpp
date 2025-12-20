@@ -99,7 +99,7 @@ void test_block_add_remove() {
     
     // Test block values are initialized to default
     if (block1.base == nullptr) {
-      TestSingleton::fail("block1 did not instantiate correctly");
+      TestSingleton::shout("block1 did not instantiate correctly");
     }
     TestSingleton::assert<int>(block1[0], 0, "block1[0] should be default (0)");
     
@@ -120,7 +120,7 @@ void test_block_get() {
     auto block1 = blocks.add_block(2);
 
     if (block1.base == nullptr) {
-      TestSingleton::fail("block1 did not instantiate correctly");
+      TestSingleton::shout("block1 did not instantiate correctly");
     }
 
     block1[0] = "hello";
@@ -144,23 +144,50 @@ void test_block_compress() {
     auto block1 = blocks.add_block(2);
 
     if (block1.base == nullptr) {
-      TestSingleton::fail("block1 did not instantiate correctly");
+      TestSingleton::shout("block1 did not instantiate correctly");
     }
 
     block1[0] = 1;
     block1[1] = 2;
+
+    /*
+    Keeping this around as an example of how to debug using my test system
+
+    TestSingleton::shout("Added block at " + std::to_string(block1.index) + "\n\t\t(buffer: ", 0);
+    TestSingleton::print_vector(blocks.copy_buffer());
+    TestSingleton::shout("; blocks: ", 0);
+    TestSingleton::print_vector(blocks.copy_blocks());
+    TestSingleton::shout(")", 0);
+    */
     
     auto block2 = blocks.add_block(3);
+
+    if (block2.base == nullptr) {
+      TestSingleton::shout("block2 did not instantiate correctly");
+    }
+
     block2[0] = 3;
     block2[1] = 4;
     block2[2] = 5;
 
-    if (block2.base == nullptr) {
-      TestSingleton::fail("block2 did not instantiate correctly");
-    }
+    /*
+    TestSingleton::shout("Added block at " + std::to_string(block2.index) + "\n\t\t(buffer: ", 0);
+    TestSingleton::print_vector(blocks.copy_buffer());
+    TestSingleton::shout("; blocks: ", 0);
+    TestSingleton::print_vector(blocks.copy_blocks());
+    TestSingleton::shout(")", 0);
+    */
     
     // Remove the first block
     blocks.remove_block(block1.index);
+
+    /*
+    TestSingleton::shout("Removed block at " + std::to_string(block1.index) + "\n\t\t(buffer: ", 0);
+    TestSingleton::print_vector(blocks.copy_buffer());
+    TestSingleton::shout("; blocks: ", 0);
+    TestSingleton::print_vector(blocks.copy_blocks());
+    TestSingleton::shout(")", 0);
+    */
     
     // Compress and verify
     auto compressed = blocks.compress_blocks();
@@ -199,7 +226,7 @@ void test_block_reuse() {
 
         if (block.base == nullptr) {
           std::string msg = "block " + std::to_string(i) + " did not instantiate correctly";
-          TestSingleton::fail(msg);
+          TestSingleton::shout(msg);
         }
 
         block[0] = 'a' + i;

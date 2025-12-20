@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <godot_cpp/core/print_string.hpp>
 #include <godot_cpp/variant/string.hpp>
@@ -26,14 +27,29 @@ class TestSingleton {
       }
     } 
 
-    inline static void fail(std::string msg) {
-      TestSingleton::t_state |= 1;
+    inline static void shout(std::string msg, long long code=1) {
+      TestSingleton::t_state |= code;
       print_line(vformat("%s", msg.c_str()));
     }
 
     inline static long long status(std::string name) { 
       print_line(vformat("Test status for %s... %s", name.c_str(), TestSingleton::t_state ? "NOT OK":"OK"));
       return TestSingleton::t_state;
+    }
+
+    template<typename T>
+    inline static void print_vector(std::vector<T> &buf) {
+
+      if (buf.size() == 0) {
+        print_line("[]");
+        return;
+      }
+
+      auto s = vformat("%s", buf[0]);
+      for (int i = 1; i < buf.size(); i++) {
+        s += vformat(", %s", buf[i]);
+      }
+      print_line(s);
     }
 };
 
