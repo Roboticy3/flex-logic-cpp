@@ -1,6 +1,5 @@
 #pragma once
 
-#include "collections/span.h"
 #include "circuit/circuit.h"
 #include "circuit/gate.h"
 

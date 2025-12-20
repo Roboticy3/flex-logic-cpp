@@ -4,15 +4,15 @@
 #include "test_definitions.h"
 #include "circuit_test/gate_test.h"
 
-#include "collections/span.h"
 #include "circuit/circuit.h"
 #include "circuit/gate_types_example.h"
 
-Buffer<pin<int>> make_test_pins(std::vector<int> states) {
-  Buffer<pin<int>> result;
+Labeling<pin<int>> make_test_pins(std::vector<int> states) {
+  Labeling<pin<int>> result;
+  Buffer<pin<int>> buffer;
 
   for (int s : states) {
-    result.push_back(pin<int>{
+    buffer.push_back(pin<int>{
       true,
       {
         { 0 },
@@ -21,6 +21,8 @@ Buffer<pin<int>> make_test_pins(std::vector<int> states) {
       s,
     });
   }
+
+  result = Labeling<pin<int>>(buffer);
 
   return result;
 }

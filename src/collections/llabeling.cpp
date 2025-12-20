@@ -1,7 +1,6 @@
 #include <string>
 
 #include "collections/llabeling.h"
-#include "collections/span.h"
 
 // Implementation for Labeling class (inherits from LLabeling<T, ll>)
 
@@ -15,7 +14,7 @@ size_t Labeling<T>::count() {
     // Count non-empty elements in the buffer
     size_t count = 0;
     for (const auto& elem : this->buffer) {
-        if (!this->is_empty(elem)) {  // Check if element is not empty/default constructed
+        if (!is_empty(elem)) {  // Check if element is not empty/default constructed
             count++;
         }
     }
@@ -26,7 +25,7 @@ template<typename T>
 ll Labeling<T>::add(T element) {
     // Find the lowest available empty index
     for (ll i = 0; i < this->buffer.size(); i++) {
-        if (this->is_empty(this->buffer[i])) {  // Empty slot found
+        if (is_empty(this->buffer[i])) {  // Empty slot found
             this->buffer[i] = element;
             return i;
         }
@@ -55,7 +54,7 @@ T *Labeling<T>::get(ll at) {
     }
     
     // Return nullptr if slot is empty, otherwise return pointer to element
-    if (this->is_empty(this->buffer[at])) {
+    if (is_empty(this->buffer[at])) {
         return nullptr;
     }
     
@@ -68,7 +67,7 @@ bool Labeling<T>::remove(ll at) {
         return false;
     }
     
-    if (this->is_empty(this->buffer[at])) {
+    if (is_empty(this->buffer[at])) {
         return false;  // Already empty
     }
     
@@ -79,7 +78,7 @@ bool Labeling<T>::remove(ll at) {
 template<typename T>
 void Labeling<T>::compress(std::vector<T> &out) {
     for (const auto& elem : this->buffer) {
-        if (!this->is_empty(elem)) {  // Only add non-empty elements
+        if (!is_empty(elem)) {  // Only add non-empty elements
             out.push_back(elem);
         }
     }
@@ -98,7 +97,7 @@ span<T> BlockLabeling<T>::add_block(size_t size, ll start) {
         return new_block;
     }
 
-    new_block.base = &this->buffer;
+    new_block.base = this;
     new_block.size = size;
 
     for (ll i = start; i < this->buffer.size(); i++) {
@@ -163,7 +162,7 @@ span<T> BlockLabeling<T>::get_block(ll from) {
         return result;
     }
 
-    result.base = &this->buffer;
+    result.base = this;
     result.index = this->blocks[from];
 
     for (ll i = start; i < this->blocks.size(); i++) {
@@ -191,7 +190,7 @@ span<T> BlockLabeling<T>::set_block(ll start, span<T> source) {
         this->blocks[start + i] = start;
     }
 
-    return span<T>{&this->buffer, size_t(start), size};
+    return span<T>{this, size_t(start), size};
 }
 
 template<typename T>

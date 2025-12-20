@@ -4,7 +4,6 @@
 
 #include "collections/llabeling.h"
 #include "collections/levents.h"
-#include "collections/span.h"
 
 /*
 use a gate's state from pins P to add to event queue levents<S, T>

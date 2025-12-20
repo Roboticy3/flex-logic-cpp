@@ -1,21 +1,26 @@
 #pragma once
 
+#include <cstddef>
+
 #include <functional>
 #include <vector>
 
-#include <collections/span.h>
+/*
+Buffers are vectors that should not be moved.
+*/
+template<typename T>
+class Buffer : public std::vector<T> {};
 
 typedef long long ll;
 
 #define LABEL_EMPTY -1
 
 template<typename T>
-inline bool is_empty_default(T element) {
+inline bool is_empty(T element) {
   return element == T{};
 }
 
-template<typename T>
-inline bool is_empty_label(ll label) {
+inline bool is_empty(ll label) {
   return label == -1;
 }
 
@@ -71,11 +76,10 @@ Empty values correspond IsEmpty, and T must be a literal.
 template<typename T>
 class Labeling : public LLabeling<T, ll> {
   protected:
-    std::function<bool(T)> is_empty;
     Buffer<T> buffer;
   public:
-    Labeling() : is_empty(is_empty_default<T>) {};
-    Labeling(std::function<bool(T)> custom_is_empty) : is_empty(custom_is_empty) {};
+    Labeling() {};
+    Labeling(Buffer<T> buffer) : buffer(buffer) {};
 
     size_t size();
     size_t count();
@@ -84,6 +88,20 @@ class Labeling : public LLabeling<T, ll> {
     T *get(ll at);
     bool remove(ll at);
     void compress(std::vector<T> &out);
+
+    T &operator[](size_t idx) { return buffer[idx]; }
+};
+
+/*
+Spans are slices of buffers that are retained when the buffer grows.
+*/
+template<typename T>
+struct span {
+  Labeling<T> *base;
+  size_t index;
+  size_t size;
+  
+  T& operator[](size_t idx) { return (*base)[idx]; }
 };
 
 template<typename T>

@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include "collections/span.h"
 #include "collections/llabeling.h"
 #include "circuit/gate.h"
 
@@ -18,6 +17,11 @@ struct pin {
   S state;
 };
 
+template<typename S>
+inline bool is_empty_default(pin<S> element) {
+  return !element.valid;
+}
+
 /*
 A net connects to a list of pins and holds a gate type, indexed by tid
 
@@ -32,11 +36,18 @@ struct net {
   ll tid;
 };
 
+inline bool is_empty_default(net element) {
+  return element.pins.base == nullptr || element.pins.base->count() == 0;
+}
+
 template<typename S, typename T>
 struct circuit {
   Labeling<net> netlist;
   Labeling<pin<S>> pinlist;
   Labeling<gate<span<pin<S>>,S,T>> gatetypes;
+
+  BlockLabeling<ll> netblocks;
+  BlockLabeling<ll> pinblock;
 
   inline ll find_type_name(std::string name) {
     for (int i = 0; i < gatetypes.size(); i++) {
@@ -45,6 +56,15 @@ struct circuit {
         return i;
       }
     }
+  }
+
+  inline std::vector<ll> view_pins(ll nid) {
+    auto p_net = netlist.get(nid);
+    if (p_net) {
+      return {};
+    }
+
+    return p_net->pins.compress();
   }
 };
 
