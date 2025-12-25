@@ -1,5 +1,7 @@
-# godot-cpp template
-This repository serves as a quickstart template for GDExtension development with Godot 4.0+.
+# flex-logic-cpp
+This is a fork of godot-cpp template. I have the rest of the readme appended below.
+
+My goal was to take a C++ based approach to some designs from [flex_logic](https://github.com/Roboticy3/flex_logic) for easier integration with Godot. I fell down too many rabbitholes and ran out of time. I'm keeping this repository around for archival reasons, and can't change the visibility since it is a fork. So, enjoy some questionable C++17 if you may, but know that this isn't a serious product. If you want to see a more complete circuit editor, check out my Go implementation in the flex_logic repo.
 
 ## Contents
 * An empty Godot project (`demo/`)
